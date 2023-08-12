@@ -7,7 +7,7 @@
 </head>
 <body>
     <h1>Events for {{ name }}</h1>
-
+    <a href="{{ pr_history_url }}">View PR History</a>
     <!-- Display a list of events for the user -->
     <form action="/person/{{ user_id }}" method="POST">
         {% for event in events %}

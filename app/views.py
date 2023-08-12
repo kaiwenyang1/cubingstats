@@ -1,8 +1,108 @@
-from flask import render_template, jsonify, request
+from flask import render_template, jsonify, request, url_for
 from . import app, mysql
-from .competitor import get_user_name_mapping
+from .competitor import get_user_name_mapping, get_pr_dict
 
 RECORDS_PER_PAGE = 20
+event_list = [
+"222"
+,"333"
+,"333bf"
+,"333fm"
+,"333ft"
+,"333mbf"
+,"333mbo"
+,"333oh"
+,"444"
+,"444bf"
+,"555"
+,"555bf"
+,"666"
+,"777"
+,"clock"
+,"magic"
+,"minx"
+,"mmagic"
+,"pyram"
+,"skewb"
+,"sq1"]
+
+@app.route('/person/<string:user_id>/pr_history', methods=['GET'])
+def pr_history(user_id):
+
+    def better_result(time1, time2):
+        if time1 <= 0:
+            return time2
+        if time2 <= 0:
+            return time1
+        return min(time1,time2)
+    def is_better_result(time1, time2):
+        if time1 <= 0 and time2 <= 0:
+            return False
+        if time1 <= 0:
+            return False
+        if time2 <= 0:
+            return True
+        return time1 <= time2
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT * FROM Results WHERE personId = %s", [user_id])
+    comps = []
+    column_names = [column[0] for column in cur.description]
+    print(column_names)
+    raw_results = cur.fetchall()
+    for row in raw_results:
+        print(row)
+    print("")
+    results = [dict(zip(column_names, row)) for row in raw_results]
+    for row in results:
+        print("gabe: ", end = "")
+        print(row)
+    print(results)
+    print("")
+    cur.execute("SELECT DISTINCT competitionId FROM Results WHERE personId = %s", [user_id])
+
+    raw_results = cur.fetchall()
+    for row in raw_results:
+        comps.append(row[0])
+
+    # dictionary of list of current best result
+    comp_results_single = {}
+    comp_results_avg = {}
+    for event in event_list:
+        comp_results_single[event] = -1
+        comp_results_avg[event] = -1
+    # dictionary of list of avg PRs 
+    comp_pr_single = {}
+    comp_pr_avg = {} 
+    for comp in comps:
+        print(comp)
+
+        cur.execute("SELECT * FROM Results WHERE competitionId = %s AND personID = %s", (comp, user_id))
+        column_names = [column[0] for column in cur.description]
+        raw_results = cur.fetchall()
+        results = [dict(zip(column_names, row)) for row in raw_results]
+
+        comp_pr_single[comp] = []
+        comp_pr_avg[comp] = []
+        ## Find the PR in the current comp for each event and update
+        for row in results:
+            curEvent = row["eventId"]
+            if is_better_result(row["best"], comp_results_single[curEvent]):
+                comp_pr_single[comp].append((curEvent, row["best"]))
+                comp_results_single[curEvent] = better_result(row["best"], comp_results_single[curEvent])
+            if is_better_result(row["average"], comp_results_avg[curEvent]):
+                comp_pr_avg[comp].append((curEvent, row["average"]))
+                comp_results_avg[curEvent] = better_result(row["average"], comp_results_avg[curEvent])    
+
+    for comp in comps:
+        print(comp_pr_single[comp])
+        print("")
+        print(comp_pr_avg[comp])
+
+    print(comps)
+    return render_template('pr_history.html', 
+                           comp_pr_single=comp_pr_single, 
+                           comp_pr_avg=comp_pr_avg,
+                           comps=comps)
 
 @app.route('/rankings/<string:event_id>', methods=['POST', 'GET'])
 def rankings(event_id):
@@ -31,10 +131,8 @@ def rankings(event_id):
 
     # Calculate number of pages
     cur.execute("SELECT * FROM RanksSingle WHERE eventId = %s", (selected_event,))
-
+    get_pr_dict("2023CHOW01")
     user_names = get_user_name_mapping()
-
-
 
     raw_results = cur.fetchall()
     total_records = len(raw_results)
@@ -47,6 +145,7 @@ def rankings(event_id):
 
 @app.route('/person/<string:user_id>', methods=['POST', 'GET'])  # Updated to use <string:user_id>
 def person_stats(user_id):
+
     cur = mysql.connection.cursor()
     selected_event = "333"
     
@@ -73,7 +172,7 @@ def person_stats(user_id):
     # fetch results in selected event
         
     return render_template('person_stats.html', selected_event = selected_event, events=events, results=stats,
-        name=person_name, user_id = user_id)
+        name=person_name, user_id = user_id, pr_history_url=url_for('pr_history', user_id=user_id))
 
 @app.route('/search', methods=['POST', 'GET'])
 def search():

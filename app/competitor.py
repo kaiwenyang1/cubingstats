@@ -8,3 +8,5 @@ def get_user_name_mapping():
     # Convert the raw results to a dictionary
     user_name_mapping = {row[0]: row[1] for row in raw_results}
     return user_name_mapping
+
+

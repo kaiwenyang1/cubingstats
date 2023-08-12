@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PR History</title>
+</head>
+<body>
+
+<h2>Personal Records - Singles</h2>
+{% for comp, prs in comp_pr_single.items() %}
+<h3>{{ comp }}</h3>
+<table>
+    <thead>
+        <tr>
+            <th>Event</th>
+            <th>Result</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for event, result in prs %}
+            <tr>
+                <td>{{ event }}</td>
+                <td>{{ result }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endfor %}
+
+<h2>Personal Records - Averages</h2>
+{% for comp, prs in comp_pr_avg.items() %}
+<h3>{{ comp }}</h3>
+<table>
+    <thead>
+        <tr>
+            <th>Event</th>
+            <th>Average</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for event, avg in prs %}
+            <tr>
+                <td>{{ event }}</td>
+                <td>{{ avg }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endfor %}
+
+</body>
+</html>
