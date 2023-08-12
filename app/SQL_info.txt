@@ -1,0 +1,200 @@
+SHOW TABLES;
++-----------------------------------------+
+| Tables_in_wca                           |
++-----------------------------------------+
+| championships                           |
+| Competitions                            |
+| Continents                              |
+| Countries                               |
+| eligible_country_iso2s_for_championship |
+| Events                                  |
+| Formats                                 |
+| Persons                                 |
+| RanksAverage                            |
+| RanksSingle                             |
+| Results                                 |
+| Rounds                                  |
+| RoundTypes                              |
+| Scrambles                               |
++-----------------------------------------+
+
+mysql> DESCRIBE championships;
++-------------------+--------------+------+-----+---------+-------+
+| Field             | Type         | Null | Key | Default | Extra |
++-------------------+--------------+------+-----+---------+-------+
+| id                | int          | NO   |     | 0       |       |
+| competition_id    | varchar(191) | NO   |     | NULL    |       |
+| championship_type | varchar(191) | NO   |     | NULL    |       |
++-------------------+--------------+------+-----+---------+-------+
+
+mysql> DESCRIBE competitions;
++------------------+-------------------+------+-----+---------+-------+
+| Field            | Type              | Null | Key | Default | Extra |
++------------------+-------------------+------+-----+---------+-------+
+| id               | varchar(32)       | NO   |     |         |       |
+| name             | varchar(50)       | NO   |     |         |       |
+| cityName         | varchar(50)       | NO   |     |         |       |
+| countryId        | varchar(50)       | NO   |     |         |       |
+| information      | mediumtext        | YES  |     | NULL    |       |
+| year             | smallint unsigned | NO   |     | 0       |       |
+| month            | smallint unsigned | NO   |     | 0       |       |
+| day              | smallint unsigned | NO   |     | 0       |       |
+| endMonth         | smallint unsigned | NO   |     | 0       |       |
+| endDay           | smallint unsigned | NO   |     | 0       |       |
+| cancelled        | int               | NO   |     | 0       |       |
+| eventSpecs       | longtext          | YES  |     | NULL    |       |
+| wcaDelegate      | mediumtext        | YES  |     | NULL    |       |
+| organiser        | mediumtext        | YES  |     | NULL    |       |
+| venue            | varchar(240)      | NO   |     |         |       |
+| venueAddress     | varchar(120)      | YES  |     | NULL    |       |
+| venueDetails     | varchar(120)      | YES  |     | NULL    |       |
+| external_website | varchar(200)      | YES  |     | NULL    |       |
+| cellName         | varchar(45)       | NO   |     |         |       |
+| latitude         | int               | YES  |     | NULL    |       |
+| longitude        | int               | YES  |     | NULL    |       |
++------------------+-------------------+------+-----+---------+-------+
+
+mysql> DESCRIBE continents;
++------------+-------------+------+-----+---------+-------+
+| Field      | Type        | Null | Key | Default | Extra |
++------------+-------------+------+-----+---------+-------+
+| id         | varchar(50) | NO   |     |         |       |
+| name       | varchar(50) | NO   |     |         |       |
+| recordName | char(3)     | NO   |     |         |       |
+| latitude   | int         | NO   |     | 0       |       |
+| longitude  | int         | NO   |     | 0       |       |
+| zoom       | tinyint     | NO   |     | 0       |       |
++------------+-------------+------+-----+---------+-------+
+
+mysql> DESCRIBE countries;
++-------------+-------------+------+-----+---------+-------+
+| Field       | Type        | Null | Key | Default | Extra |
++-------------+-------------+------+-----+---------+-------+
+| id          | varchar(50) | NO   |     |         |       |
+| name        | varchar(50) | NO   |     |         |       |
+| continentId | varchar(50) | NO   |     |         |       |
+| iso2        | char(2)     | YES  |     | NULL    |       |
++-------------+-------------+------+-----+---------+-------+
+
+mysql> DESCRIBE eligible_country_iso2s_for_championship;
++-----------------------+--------------+------+-----+---------+-------+
+| Field                 | Type         | Null | Key | Default | Extra |
++-----------------------+--------------+------+-----+---------+-------+
+| id                    | bigint       | NO   |     | 0       |       |
+| championship_type     | varchar(191) | NO   |     | NULL    |       |
+| eligible_country_iso2 | varchar(191) | NO   |     | NULL    |       |
++-----------------------+--------------+------+-----+---------+-------+
+
+mysql> DESCRIBE events;
++----------+-------------+------+-----+---------+-------+
+| Field    | Type        | Null | Key | Default | Extra |
++----------+-------------+------+-----+---------+-------+
+| id       | varchar(6)  | NO   |     |         |       |
+| name     | varchar(54) | NO   |     |         |       |
+| rank     | int         | NO   |     | 0       |       |
+| format   | varchar(10) | NO   |     |         |       |
+| cellName | varchar(45) | NO   |     |         |       |
++----------+-------------+------+-----+---------+-------+
+
+mysql> DESCRIBE formats;
++----------------------+--------------+------+-----+---------+-------+
+| Field                | Type         | Null | Key | Default | Extra |
++----------------------+--------------+------+-----+---------+-------+
+| id                   | char(1)      | NO   |     |         |       |
+| name                 | varchar(50)  | NO   |     |         |       |
+| sort_by              | varchar(255) | NO   |     | NULL    |       |
+| sort_by_second       | varchar(255) | NO   |     | NULL    |       |
+| expected_solve_count | int          | NO   |     | NULL    |       |
+| trim_fastest_n       | int          | NO   |     | NULL    |       |
+| trim_slowest_n       | int          | NO   |     | NULL    |       |
++----------------------+--------------+------+-----+---------+-------+
+
+mysql> DESCRIBE persons;
++-----------+-------------+------+-----+---------+-------+
+| Field     | Type        | Null | Key | Default | Extra |
++-----------+-------------+------+-----+---------+-------+
+| id        | varchar(10) | NO   |     |         |       |
+| subid     | tinyint     | NO   |     | 1       |       |
+| name      | varchar(80) | YES  |     | NULL    |       |
+| countryId | varchar(50) | NO   |     |         |       |
+| gender    | char(1)     | YES  |     |         |       |
++-----------+-------------+------+-----+---------+-------+
+
+mysql> DESCRIBE RanksAverage;
++---------------+-------------+------+-----+---------+-------+
+| Field         | Type        | Null | Key | Default | Extra |
++---------------+-------------+------+-----+---------+-------+
+| personId      | varchar(10) | NO   |     |         |       |
+| eventId       | varchar(6)  | NO   |     |         |       |
+| best          | int         | NO   |     | 0       |       |
+| worldRank     | int         | NO   |     | 0       |       |
+| continentRank | int         | NO   |     | 0       |       |
+| countryRank   | int         | NO   |     | 0       |       |
++---------------+-------------+------+-----+---------+-------+
+
+mysql> DESCRIBE RankSingle;
++---------------+-------------+------+-----+---------+-------+
+| Field         | Type        | Null | Key | Default | Extra |
++---------------+-------------+------+-----+---------+-------+
+| personId      | varchar(10) | NO   |     |         |       |
+| eventId       | varchar(6)  | NO   |     |         |       |
+| best          | int         | NO   |     | 0       |       |
+| worldRank     | int         | NO   |     | 0       |       |
+| continentRank | int         | NO   |     | 0       |       |
+| countryRank   | int         | NO   |     | 0       |       |
++---------------+-------------+------+-----+---------+-------+
+
+mysql> DESCRIBE Results;
++-----------------------+-------------+------+-----+---------+-------+
+| Field                 | Type        | Null | Key | Default | Extra |
++-----------------------+-------------+------+-----+---------+-------+
+| competitionId         | varchar(32) | NO   |     |         |       |
+| eventId               | varchar(6)  | NO   |     |         |       |
+| roundTypeId           | char(1)     | NO   |     |         |       |
+| pos                   | smallint    | NO   |     | 0       |       |
+| best                  | int         | NO   |     | 0       |       |
+| average               | int         | NO   |     | 0       |       |
+| personName            | varchar(80) | YES  |     | NULL    |       |
+| personId              | varchar(10) | NO   |     |         |       |
+| personCountryId       | varchar(50) | YES  |     | NULL    |       |
+| formatId              | char(1)     | NO   |     |         |       |
+| value1                | int         | NO   |     | 0       |       |
+| value2                | int         | NO   |     | 0       |       |
+| value3                | int         | NO   |     | 0       |       |
+| value4                | int         | NO   |     | 0       |       |
+| value5                | int         | NO   |     | 0       |       |
+| regionalSingleRecord  | char(3)     | YES  |     | NULL    |       |
+| regionalAverageRecord | char(3)     | YES  |     | NULL    |       |
++-----------------------+-------------+------+-----+---------+-------+
+
+mysql> DESCRIBE rounds;
++---------------+--------------+------+-----+---------+-------+
+| Field         | Type         | Null | Key | Default | Extra |
++---------------+--------------+------+-----+---------+-------+
+| sorry_message | varchar(172) | NO   |     |         |       |
++---------------+--------------+------+-----+---------+-------+
+
+mysql> DESCRIBE roundtypes;
++----------+-------------+------+-----+---------+-------+
+| Field    | Type        | Null | Key | Default | Extra |
++----------+-------------+------+-----+---------+-------+
+| id       | char(1)     | NO   |     |         |       |
+| rank     | int         | NO   |     | 0       |       |
+| name     | varchar(50) | NO   |     |         |       |
+| cellName | varchar(45) | NO   |     |         |       |
+| final    | tinyint(1)  | NO   |     | NULL    |       |
++----------+-------------+------+-----+---------+-------+
+
+mysql> DESCRIBE scrambles;
++---------------+--------------+------+-----+---------+-------+
+| Field         | Type         | Null | Key | Default | Extra |
++---------------+--------------+------+-----+---------+-------+
+| scrambleId    | int unsigned | NO   |     | 0       |       |
+| competitionId | varchar(32)  | NO   |     | NULL    |       |
+| eventId       | varchar(6)   | NO   |     | NULL    |       |
+| roundTypeId   | char(1)      | NO   |     | NULL    |       |
+| groupId       | varchar(3)   | NO   |     | NULL    |       |
+| isExtra       | tinyint(1)   | NO   |     | NULL    |       |
+| scrambleNum   | int          | NO   |     | NULL    |       |
+| scramble      | text         | NO   |     | NULL    |       |
++---------------+--------------+------+-----+---------+-------+
