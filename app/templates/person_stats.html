@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Statistics for {{ name }}</title>
+</head>
+<body>
+    <h1>Events for {{ name }}</h1>
+
+    <!-- Display a list of events for the user -->
+    <form action="/person/{{ user_id }}" method="POST">
+        {% for event in events %}
+            <button type="submit" name="event_name" value="{{ event }}">{{ event }}</button>
+        {% endfor %}
+    </form>
+    <h1>Statistics for {{ name }}</h1>
+    <h2>Event: {{ selected_event }}</h2>
+    <table>
+        <thead>
+            <tr>
+                {% if results and results[0] %}
+                    {% for column in results[0].keys() %}
+                        <th>{{ column }}</th>
+                    {% endfor %}
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for result in results %}
+                <tr>
+                    {% for value in result.values() %}
+                        <td>{{ value }}</td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

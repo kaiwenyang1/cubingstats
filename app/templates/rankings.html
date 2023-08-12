@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Rankings</title>
+</head>
+<body>
+
+<form method="POST">
+    <label for="selected_event">Event:</label>
+    <select name="selected_event">
+        {% for event in events %}
+            <option value="{{ event }}" {% if event == selected_event %}selected{% endif %}>{{ event }}</option>
+        {% endfor %}
+    </select>
+    <input type="submit" value="Submit">
+
+    <label for="page">Page:</label>
+    <select name="page">
+        {% for page_num in range(1, total_pages + 1) %}
+            <option value="{{ page_num }}" {% if page_num == page %} selected {% endif %}>{{ page_num }}</option>
+        {% endfor %}
+    </select>
+
+    <input type="submit" value="Go">
+</form>
+
+
+
+<table>
+    <thead>
+        {% for col in stats[0].keys() %}
+            <th>{{ col }}</th>
+        {% endfor %}
+    </thead>
+    <tbody>
+        {% for row in stats %}
+            <tr>
+                {% for col, val in row.items() %}
+                    {% if col == 'personId' %}
+                        <td><a href="{{ url_for('person_stats', user_id=val) }}">{{ user_names[val] }}</a></td>
+                    {% else %}
+                        <td>{{ val }}</td>
+                    {% endif %}
+                {% endfor %}
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+</body>
+</html>

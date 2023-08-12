@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>World Cube Association Stats</title>
+</head>
+<body>
+    <form action="/rankings/333" method="get">
+        <button type="submit">View Rankings</button>
+    </form>
+
+    <h1>Stats from World Cube Association</h1>
+    <form action="/search" method="post">
+        <label for="name">Search for a person's name:</label>
+        <input type="text" id="name" name="name" value="{{ search_name }}">
+        <input type="submit" value="Search">
+    </form>
+    
+    {% if stats %}
+        <table>
+            <thead>
+                <tr>
+                    {% for column in stats[0].keys() %}
+                    <th>{{ column }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for stat in stats %}
+                    <tr>
+                        {% for value in stat.values() %}
+                        <td>{{ value }}</td>
+                        {% endfor %}
+                        <td>
+                            <a href="{{ url_for('person_stats', user_id=stat.id) }}">View Stats</a> <!-- Moved inside the row -->
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        <div id="pagination">
+            {% for i in range(1, total_pages + 1) %}
+                <a href="{{ url_for('search', page=i, name=search_name) }}" {% if i == page %}class="active"{% endif %}>{{ i }}</a>
+            {% endfor %}
+
+        </div>
+        
+        <button id="togglePagination">Toggle Page Numbers</button>
+    {% endif %}
+
+    <script>
+        document.getElementById('togglePagination').addEventListener('click', function() {
+            const pagination = document.getElementById('pagination');
+            if (pagination.style.display === 'none' || pagination.style.display === '') {
+                pagination.style.display = 'block';
+            } else {
+                pagination.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
