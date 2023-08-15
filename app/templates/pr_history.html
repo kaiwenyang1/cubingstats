@@ -1,51 +1,91 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <title>PR History</title>
+    <script>
+        function toggleBlindComps() {
+            var isChecked = document.getElementById("blindToggle").checked;
+            var allComps = document.getElementById("allComps");
+            var noBlindComps = document.getElementById("noBlindComps");
+            if (isChecked) {
+                allComps.style.display = "block";
+                noBlindComps.style.display = "none";
+            } else {
+                allComps.style.display = "none";
+                noBlindComps.style.display = "block";
+            }
+        }
+    </script>
 </head>
 <body>
 
-<h2>Personal Records - Singles</h2>
-{% for comp, prs in comp_pr_single.items() %}
-<h3>{{ comp }}</h3>
-<table>
-    <thead>
-        <tr>
-            <th>Event</th>
-            <th>Result</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for event, result in prs %}
-            <tr>
-                <td>{{ event }}</td>
-                <td>{{ result }}</td>
-            </tr>
-        {% endfor %}
-    </tbody>
-</table>
-{% endfor %}
+<input type="checkbox" id="blindToggle" onclick="toggleBlindComps()"> Include Blindfolded & FMC Competitions
 
-<h2>Personal Records - Averages</h2>
-{% for comp, prs in comp_pr_avg.items() %}
-<h3>{{ comp }}</h3>
-<table>
-    <thead>
-        <tr>
-            <th>Event</th>
-            <th>Average</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for event, avg in prs %}
-            <tr>
-                <td>{{ event }}</td>
-                <td>{{ avg }}</td>
-            </tr>
-        {% endfor %}
-    </tbody>
-</table>
-{% endfor %}
+<div id="allComps" style="display: none;">
+    <h2>PR Streak: {{ pr_streak_blind }}</h2>
+    <h2>Best PR Streak: {{ best_pr_streak_blind }}</h2>
+    {% for comp in combined_pr_data_blind %}
+        <div class="comp">
+            <h2>{{ comp.comp_name }}</h2>
+            
+            <h3>PR Singles:</h3>
+            {% if comp.pr_singles|length > 0 %}
+                <ul>
+                {% for pr in comp.pr_singles %}
+                    <li>{{ pr[0] }}: {{ pr[1] }}</li>
+                {% endfor %}
+                </ul>
+            {% else %}
+                None :(
+            {% endif %}
+
+            <h3>PR Averages:</h3>
+            {% if comp.pr_averages|length > 0 %}
+                <ul>
+                {% for pr in comp.pr_averages %}
+                    <li>{{ pr[0] }}: {{ pr[1] }}</li>
+                {% endfor %}
+                </ul>
+            {% else %}
+                None :(
+            {% endif %}
+            <hr>
+        </div>
+    {% endfor %}
+</div>
+
+<div id="noBlindComps">
+    <h2>PR Streak: {{ pr_streak }}</h2>
+    <h2>Best PR Streak: {{ best_pr_streak }}</h2>
+    {% for comp in combined_pr_data %}
+        <div class="comp">
+            <h2>{{ comp.comp_name }}</h2>
+            
+            <h3>PR Singles:</h3>
+            {% if comp.pr_singles|length > 0 %}
+                <ul>
+                {% for pr in comp.pr_singles %}
+                    <li>{{ pr[0] }}: {{ pr[1] }}</li>
+                {% endfor %}
+                </ul>
+            {% else %}
+                None :(
+            {% endif %}
+
+            <h3>PR Averages:</h3>
+            {% if comp.pr_averages|length > 0 %}
+                <ul>
+                {% for pr in comp.pr_averages %}
+                    <li>{{ pr[0] }}: {{ pr[1] }}</li>
+                {% endfor %}
+                </ul>
+            {% else %}
+                None :(
+            {% endif %}
+            <hr>
+        </div>
+    {% endfor %}
+</div>
 
 </body>
 </html>

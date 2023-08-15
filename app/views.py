@@ -1,6 +1,6 @@
 from flask import render_template, jsonify, request, url_for
 from . import app, mysql
-from .competitor import get_user_name_mapping, get_pr_dict
+from .competitor import get_user_name_mapping
 
 RECORDS_PER_PAGE = 20
 event_list = [
@@ -25,6 +25,33 @@ event_list = [
 ,"pyram"
 ,"skewb"
 ,"sq1"]
+blind_events = {"333bf", "333fm", "444bf", "555bf", "333mbf"}
+blind_comp_list = set()
+
+def write_to_file(comps_set, filename):
+    with open(filename, 'w') as f:
+        for comp in comps_set:
+            f.write(comp + '\n')
+
+def get_blind_events():
+
+    with open("comp_list.txt", 'r') as f:
+        for line in f:
+
+            comp_name, events = line.strip().split('\t')
+
+            events_list = events.split()
+
+            blind_events_count = sum(1 for event in events_list if event in blind_events)
+
+            if blind_events_count * 2 > len(events_list):
+                blind_comp_list.add(comp_name)
+
+    output_filename = "output.txt"
+    write_to_file(blind_comp_list, output_filename)
+
+
+get_blind_events()
 
 @app.route('/person/<string:user_id>/pr_history', methods=['GET'])
 def pr_history(user_id):
@@ -35,6 +62,7 @@ def pr_history(user_id):
         if time2 <= 0:
             return time1
         return min(time1,time2)
+
     def is_better_result(time1, time2):
         if time1 <= 0 and time2 <= 0:
             return False
@@ -43,6 +71,7 @@ def pr_history(user_id):
         if time2 <= 0:
             return True
         return time1 <= time2
+
     cur = mysql.connection.cursor()
     cur.execute("SELECT * FROM Results WHERE personId = %s", [user_id])
     comps = []
@@ -70,13 +99,21 @@ def pr_history(user_id):
     for event in event_list:
         comp_results_single[event] = -1
         comp_results_avg[event] = -1
+
     # dictionary of list of avg PRs 
     comp_pr_single = {}
     comp_pr_avg = {} 
+
+    best_pr_streak = 0
+    pr_streak = 0
+    best_pr_streak_blind = 0
+    pr_streak_blind = 0
+
+    cur.execute("CREATE TEMPORARY TABLE UserResults AS SELECT * FROM Results WHERE personId = %s;", [user_id])
     for comp in comps:
         print(comp)
 
-        cur.execute("SELECT * FROM Results WHERE competitionId = %s AND personID = %s", (comp, user_id))
+        cur.execute("SELECT * FROM UserResults WHERE competitionId = %s AND personID = %s", (comp, user_id))
         column_names = [column[0] for column in cur.description]
         raw_results = cur.fetchall()
         results = [dict(zip(column_names, row)) for row in raw_results]
@@ -89,6 +126,7 @@ def pr_history(user_id):
             if is_better_result(row["best"], comp_results_single[curEvent]):
                 comp_pr_single[comp].append((curEvent, row["best"]))
                 comp_results_single[curEvent] = better_result(row["best"], comp_results_single[curEvent])
+
             if is_better_result(row["average"], comp_results_avg[curEvent]):
                 comp_pr_avg[comp].append((curEvent, row["average"]))
                 comp_results_avg[curEvent] = better_result(row["average"], comp_results_avg[curEvent])    
@@ -98,11 +136,39 @@ def pr_history(user_id):
         print("")
         print(comp_pr_avg[comp])
 
-    print(comps)
-    return render_template('pr_history.html', 
-                           comp_pr_single=comp_pr_single, 
-                           comp_pr_avg=comp_pr_avg,
-                           comps=comps)
+    # Combine the data
+    combined_pr_data = []
+    combined_pr_data_blind = []
+    for comp in comps:
+        comp_data = {
+            'comp_name': comp,
+            'pr_singles': comp_pr_single.get(comp, []),
+            'pr_averages': comp_pr_avg.get(comp, []),
+        }
+        if comp in blind_comp_list:
+            combined_pr_data_blind.append(comp_data)
+            if len(comp_pr_single.get(comp, [])) == 0 and len(comp_pr_avg.get(comp, [])) == 0:
+                pr_streak_blind = 0
+            else:
+                pr_streak_blind += 1
+            best_pr_streak_blind = max(best_pr_streak_blind,pr_streak_blind)
+        else:
+            combined_pr_data.append(comp_data)
+            combined_pr_data_blind.append(comp_data)
+            if len(comp_pr_single.get(comp, [])) == 0 and len(comp_pr_avg.get(comp, [])) == 0:
+                pr_streak = 0
+                pr_streak_blind = 0
+            else:
+                pr_streak += 1
+                pr_streak_blind += 1
+            best_pr_streak_blind = max(best_pr_streak_blind,pr_streak_blind)
+            best_pr_streak = max(best_pr_streak,pr_streak)
+
+    print(combined_pr_data)
+    return render_template('pr_history.html', pr_streak = pr_streak, best_pr_streak = best_pr_streak,
+        pr_streak_blind = pr_streak_blind, best_pr_streak_blind = best_pr_streak_blind, 
+        combined_pr_data_blind = combined_pr_data_blind, 
+        combined_pr_data=combined_pr_data)
 
 @app.route('/rankings/<string:event_id>', methods=['POST', 'GET'])
 def rankings(event_id):
@@ -131,7 +197,6 @@ def rankings(event_id):
 
     # Calculate number of pages
     cur.execute("SELECT * FROM RanksSingle WHERE eventId = %s", (selected_event,))
-    get_pr_dict("2023CHOW01")
     user_names = get_user_name_mapping()
 
     raw_results = cur.fetchall()
